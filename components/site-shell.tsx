@@ -1,0 +1,32 @@
+'use client'
+
+import Image from 'next/image'
+import Link from 'next/link'
+import { ArrowUpRight, ChevronDown, Globe2, Mail, MapPin, Menu, Phone, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { contact } from '@/lib/contact'
+
+const flatNav = [['Inicio', '/'], ['Despacho Jurídico', '/despacho-juridico'], ['Nuestras Propiedades', 'https://www.advocadarealestate.es/inmuebles'], ['Vende con garantías', '/vende-con-garantias'], ['Gestión Vacacional', '/gestion-vacacional'], ['Inversión', '/inversion'], ['Socios', '/socios'], ['Actualidad', '/actualidad'], ['Quiénes somos', '/quienes-somos']] as const
+
+const groups = [
+  { label: 'Inmobiliaria', links: [['Nuestras Propiedades', 'https://www.advocadarealestate.es/inmuebles'], ['Vende con garantías', '/vende-con-garantias'], ['Inversión inmobiliaria', '/inversion']] },
+  { label: 'Despacho Jurídico', links: [['Servicios jurídicos', '/despacho-juridico'], ['Quiénes somos', '/quienes-somos']] },
+  { label: 'Gestión Vacacional', links: [['Gestión de propiedades', '/gestion-vacacional/gestion-de-propiedades'], ['Overseas', '/overseas'], ['Nuestros apartamentos', '/gestion-vacacional/nuestros-apartamentos'], ['Check-in online', '/gestion-vacacional/checkin-online']] },
+  { label: 'Actualidad', links: [['Noticias y guías', '/actualidad'], ['Socios y colaboradores', '/socios']] },
+]
+function Logo({ light = false }: { light?: boolean }) { return <Link href="/" className={`brand-logo ${light ? 'brand-logo-light' : ''}`} aria-label="Grup RA, inicio"><Image src="/final.png" alt="Grup RA · advocada · real estate" width={154} height={72} /></Link> }
+function Navigation({ mobile = false, close }: { mobile?: boolean; close?: () => void }) {
+  const [active, setActive] = useState<string | null>(null)
+  const ref = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const outside = (event: MouseEvent) => { if (ref.current && !ref.current.contains(event.target as Node)) setActive(null) }
+    const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') setActive(null) }
+    document.addEventListener('mousedown', outside); document.addEventListener('keydown', escape)
+    return () => { document.removeEventListener('mousedown', outside); document.removeEventListener('keydown', escape) }
+  }, [])
+  return <nav ref={ref} className={mobile ? 'mobile-nav-groups' : 'desktop-nav-groups'} aria-label={mobile ? 'Navegación móvil' : 'Navegación principal'}>{mobile ? <>{groups.map(group => { const menuId = `menu-${group.label.toLowerCase().replaceAll(' ', '-')}`; return <div className="nav-dropdown" key={group.label}><button type="button" aria-expanded={active === group.label} aria-controls={menuId} onClick={() => setActive(active === group.label ? null : group.label)}>{group.label}<ChevronDown size={13} aria-hidden="true" /></button>{active === group.label && <div id={menuId} className="nav-dropdown-menu">{group.links.map(([label, href]) => href.startsWith('http') ? <a key={href} href={href} target="_blank" rel="noopener noreferrer" onClick={() => { setActive(null); close?.() }}>{label}<ArrowUpRight size={13} aria-hidden="true" /></a> : <Link key={href} href={href} onClick={() => { setActive(null); close?.() }}>{label}</Link>)}</div>}</div> })}<Link className="button button-gold" href="#contacto" onClick={close}>Hablar con un especialista <ArrowUpRight size={16} /></Link></> : flatNav.map(([label, href]) => href.startsWith('http') ? <a key={href} href={href} target="_blank" rel="noopener noreferrer">{label}<ArrowUpRight size={13} aria-hidden="true" /></a> : <Link key={href} href={href}>{label}</Link>)}</nav>
+}
+export function SiteHeader() { const [open, setOpen] = useState(false); const [languageOpen, setLanguageOpen] = useState(false); return <header className="site-header site-header-global"><div className="topbar"><div className="container topbar-inner"><a href="tel:+34669750096"><Phone size={13} /> 669 750 096</a><span className="top-address"><MapPin size={13} /> Tarragona · Costa Daurada</span>{contact.emails.map(email => <a key={email} href={`mailto:${email}`} className="top-email"><Mail size={13} /> {email}</a>)}<div className="language-picker"><button className="language" type="button" aria-expanded={languageOpen} aria-label="Seleccionar idioma" onClick={() => setLanguageOpen(!languageOpen)}><Globe2 size={13} /> ES <ChevronDown size={12} /></button>{languageOpen && <div className="language-menu" role="menu">{[['ES','Español'],['CA','Català'],['EN','English'],['FR','Français']].map(([code, label]) => <a key={code} href={`?lang=${code.toLowerCase()}`} role="menuitem" lang={code.toLowerCase()}>{label}</a>)}</div>}</div></div></div><div className="nav-wrap"><div className="container nav-inner"><Logo /><Navigation /><Link className="button button-gold nav-cta" href="#contacto">Hablar con un especialista <ArrowUpRight size={16} /></Link><button className="menu-button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-navigation" aria-label={open ? 'Cerrar menú' : 'Abrir menú'}>{open ? <X /> : <Menu />}</button></div></div>{open && <div className="mobile-menu" id="mobile-navigation"><div className="container"><Navigation mobile close={() => setOpen(false)} /></div></div>}</header> }
+export function SiteFooter() { return <footer className="footer"><div className="container"><div className="footer-main"><div><Logo light /><p>Derecho inmobiliario, actividad inmobiliaria y gestión patrimonial en Tarragona y Costa Daurada.</p></div>{groups.slice(0, 3).map(group => <div className="footer-col" key={group.label}><h3>{group.label}</h3>{group.links.map(([label, href]) => href.startsWith('http') ? <a key={href} href={href}>{label}</a> : <Link key={href} href={href}>{label}</Link>)}</div>)}<div className="footer-col"><h3>Contacto</h3><a href="tel:+34669750096"><Phone size={14} /> 669 750 096</a>{contact.emails.map(email => <a key={email} href={`mailto:${email}`}><Mail size={14} /> {email}</a>)}<span><MapPin size={14} /> Carrer Méndez Núñez, 4, bajo izq. · 43004 Tarragona</span></div></div><div className="footer-bottom"><span>© 2026 GRUP RA</span><div><Link href="/aviso-legal">Aviso legal</Link><Link href="/privacidad">Privacidad</Link><Link href="/cookies">Cookies</Link></div></div></div></footer> }
+export function GlobalShell({ children }: { children: React.ReactNode }) { return <><SiteHeader />{children}<SiteFooter /></> }
+export { Logo }

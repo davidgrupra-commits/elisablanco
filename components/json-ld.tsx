@@ -1,0 +1,4 @@
+// Inserta datos estructurados (JSON-LD). Escapa '<' para que el contenido no pueda cerrar la etiqueta <script>.
+export function JsonLd({ data }: { data: Record<string, unknown> }) {
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, '\\u003c') }} />
+}
